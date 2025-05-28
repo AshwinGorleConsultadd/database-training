@@ -264,10 +264,10 @@ Now this is the table ***after Pivoting*** which is giving us better understandi
         Feb AS sales 
         FROM monthly_sales;
 
-  
 
 
-#5. Database Design and Optimization
+
+# 5 Database Design and Optimization
 
 ### a) Indexing
 - **Clustered Index**
