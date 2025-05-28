@@ -32,10 +32,10 @@ A DBMS is software that manages databases. It provides tools for data storage, r
 - **SQL (Structured Query Language)** databases use fixed schemas and are optimized for complex queries and transactional consistency (ACID compliance).
 - **NoSQL** databases offer more flexibility with dynamic schemas, allowing fast performance and easy scaling, especially for unstructured or distributed data systems. Each has its strengths depending on the application requirements.
 
-## 2 Relational Database Fundamentals
+## 2. Relational Database Fundamentals
 Database design is the process of structuring a database to efficiently store, manage, and retrieve data. 
 
-## a) Database Design Concepts
+### a) Database Design Concepts
 Database design is the process of structuring a database to efficiently store, manage, and retrieve data. It involves following 
 - defining tables and relationships
 - defining keys (primary, candidate, foreign and composite keys)
@@ -44,25 +44,26 @@ Database design is the process of structuring a database to efficiently store, m
 - Denormalization (done in order to improve performance)
 - Defining cardinality and participation constraints
 
-## b) Entity-relationship Model
+### b) Entity-relationship Model
 The ER model is a diagrammatic approach used to design and visualize a database's structure 
 Key Components:
 
-**Entities**: Real-world objects or concepts represented as rectangles (e.g., Student, Course).
-***Strong Entity***: Exists independently (e.g., Student).
-***Weak Entity:*** Depends on another entity (e.g., Payment with no unique ID without Student).
+**Entities**: Real-world objects or concepts represented as rectangles (Ex: Student, Course).
 
-**Attributes:** Properties or details of entities shown as ovals (e.g., Name, Age).
-Simple (Atomic): Cannot be divided (e.g., Age).
-***Composite:*** Can be divided into smaller parts.
-***Derived:*** Computed from other attributes (e.g., Age from DOB).
-***Multivalued***: Can have multiple values.
-***Primary Key (Key Attribute):*** it is Unique identifier of an entity, underlined in the ER diagram.
+- ***Strong Entity***: Exists independently (Ex: Student).
+- ***Weak Entity:*** Depends on another entity (Ex: Instalments can not exists without Loan).
+
+**Attributes:** Properties or details of entities shown as ovals (Ex: Name, Age).
+Simple (Atomic): Cannot be divided (Ex: Age).
+- ***Composite:*** Can be divided into smaller parts.
+- ***Derived:*** Computed from other attributes (Ex: Age from DOB).
+- ***Multivalued***: Can have multiple values.
+- ***Primary Key Attribute :*** it is Unique identifier of an entity, underlined in the ER diagram.
 
 **Relationships:** Associations between entities shown as diamonds.
 
-- Unary: Relationship within the same entity.
-- Binary: Between two entities (e.g., Student enrolls in Course).
+- **Unary**: Relationship within the same entity.
+- **Binary**: Between two entities (Ex: Student enrolls in Course).
 
 
 **Cardinality:** Specifies the number of instances involved in relation:
@@ -78,7 +79,7 @@ Simple (Atomic): Cannot be divided (e.g., Age).
 - Specialization: Breaking an entity into sub-entities.
 - Aggregation: A relationship treated as an entity for higher abstraction.
 
-## 3 Basic SQL Commands
+## 3. Basic SQL Commands
 
 **a) Data Definition Language (DDL)**
 DDL commands are used to define and manage the structure of database objects like tables and schemas.
@@ -118,3 +119,149 @@ TCL commands manage transactions to ensure data integrity.
 - COMMIT: Saves all changes made in the current transaction.
 - ROLLBACK: Undoes changes made in the current transaction.
 
+
+## 4. Advanced SQL Queries
+
+
+**a) Join** : Joins combine rows from two or more tables based on a common column.
+
+- **Inner Join**: Returns only matching rows from both tables on which we are applying the join.  
+  Ex: SELECT * FROM A INNER JOIN B ON A.id = B.id;
+
+- **Left Outer Join**: Returns all rows from the left table, and matched rows from the right table.  
+  Ex: SELECT * FROM A LEFT JOIN B ON A.id = B.id;
+
+- **Right Outer Join**: Returns all rows from the right table, and matched rows from the left.  
+  Ex: SELECT * FROM A RIGHT JOIN B ON A.id = B.id;
+
+- **Full Outer Join**: Returns all rows from both tables, with NULLs where we are geting  no match.  
+  Ex: SELECT * FROM A FULL OUTER JOIN B ON A.id = B.id;
+
+- **Cross Join**: Returns the Cartesian product — all combinations of two tables.  
+  Ex: SELECT * FROM A CROSS JOIN B
+
+**b) Subqueries and Correlated Subqueries**  
+Subqueries one quert nested inside another query.
+
+- **Subquery**: Executes once and returns results to the main query.  
+  Ex: SELECT name FROM students WHERE id IN (SELECT student_id FROM results WHERE mark > 80)
+
+- **Correlated Subquery**: Executes for each row of the outer query, using values from it.  
+  Ex: SELECT name, salary FROM employees e WHERE salary > ( SELECT AVG(salary) FROM employees )
+
+
+**c) Set Operations**  
+Set operations help us to combine results from multiple queries.
+
+- **UNION**: Combines results and removes duplicates or the records exists in both table taken only ones.  
+  Ex: SELECT name FROM A UNION SELECT name FROM B
+
+- **INTERSECT**: Returns only rows common to both queries.  
+  Ex: SELECT name FROM A INTERSECT SELECT name FROM B;
+
+- **EXCEPT**: Returns rows from the first query not present in the second.  
+  Ex: SELECT name FROM A EXCEPT SELECT name FROM B;
+
+**d) Window Functions**  
+Window functions perform calculations across a set of table rows related to the current row.
+
+- **ROW_NUMBER()**: Assigns a unique number to each row.
+- **RANK()**: Assigns a rank with possible gaps for ties.
+- **DENSE_RANK()**: Assigns rank without gaps for ties.
+- **NTILE(n)**: Divides result set into n roughly equal parts.
+- **LAG()**: Returns value from the previous row.
+- **LEAD()**: Returns value from the next row.
+
+Ex:  
+negative_samples AS (
+    SELECT image_id, 0 AS weak_label
+    FROM ranked_asc
+    WHERE rn % 3 = 1
+    LIMIT 10000
+)
+SELECT image_id, weak_label
+FROM (
+    SELECT * FROM positive_samples
+    UNION ALL
+    SELECT * FROM negative_samples
+) AS combined
+ORDER BY image_id;
+
+**e) Common Table Expressions (CTEs)**  
+CTEs helps us to simplify complex queries and improve readability of the query.
+
+- **CTE**: it is a temporary result set used within the main query.  
+  Ex:  
+  WITH top_students AS (  
+    SELECT name, mark FROM students WHERE mark > 90  
+  )  
+  SELECT * FROM top_students;
+
+- **Recursive CTE**: Used to query hierarchical data like org charts , employee hierarchy and tree like structure.  
+  Ex:  
+  WITH RECURSIVE subordinates AS (
+
+  SELECT id, name, manager_id
+  FROM employees
+  WHERE id = 1
+
+  UNION ALL
+
+  SELECT e.id, e.name, e.manager_id
+  FROM employees e
+  JOIN subordinates s ON e.manager_id = s.id
+  )
+  
+  SELECT * FROM subordinates;
+
+
+
+**f) Pivoting and Unpivoting Data**  
+Transform data between rows and columns.
+
+- **Pivoting**: Converts row data into columns — useful for summaries or reports or better visualization of the data.
+
+Ex: we have this order table which represents item ordered int which months along with quantity 
+| product | month | sales |
+|---------|-------|-------|
+| Pen     | Jan   | 100   |
+| Pen     | Feb   | 120   |
+| Pencil  | Jan   | 90    |
+| Pencil  | Feb   | 95    |
+
+Now this is the table ***after Pivoting*** which is giving us better understanding of how many quantity of product is sold in each month and can also compare two defferent product sale in each month.
+
+| product | Jan | Feb |
+|---------|-----|-----|
+| Pen     | 100 | 120 |
+| Pencil  | 90  | 95  |
+
+**Pivote Query**
+
+    SELECT
+    product,
+    SUM(CASE WHEN month = 'Jan' THEN sales ELSE 0 END) AS Jan,
+    SUM(CASE WHEN month = 'Feb' THEN sales ELSE 0 END) AS Feb
+    FROM sales_data
+    GROUP BY product;
+
+
+  
+
+- **Unpivoting**: Converts columns back into rows. used to normalize wide tables, Exactly reverse of pivoting.  
+**Un-Pivoting Query**
+
+        SELECT 
+        product,
+        'Jan' AS month, 
+        Jan AS sales
+        FROM monthly_sales
+        
+        UNION ALL
+        
+        SELECT product,
+        'Feb' AS month, 
+        Feb AS sales 
+        FROM monthly_sales;
+
+  
