@@ -266,6 +266,7 @@ Now this is the table ***after Pivoting*** which is giving us better understandi
 
   
 
+
 #5. Database Design and Optimization
 
 ### a) Indexing
@@ -387,7 +388,7 @@ An Explain Plan shows how the database will execute a SQL query step by step.
 | Vertical Sharding      | We split columns into different databases          |
 
 
-### e) Concurrency Control and Isolation Levels
+###e) Concurrency Control and Isolation Levels
 
 **What is Concurrency Control?**  
 Concurrency control ensures that multiple transactions can access the database simultaneously without conflicting or corrupting data.
