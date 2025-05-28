@@ -32,7 +32,7 @@ A DBMS is software that manages databases. It provides tools for data storage, r
 - **SQL (Structured Query Language)** databases use fixed schemas and are optimized for complex queries and transactional consistency (ACID compliance).
 - **NoSQL** databases offer more flexibility with dynamic schemas, allowing fast performance and easy scaling, especially for unstructured or distributed data systems. Each has its strengths depending on the application requirements.
 
-## 2. Relational Database Fundamentals
+# 2. Relational Database Fundamentals
 Database design is the process of structuring a database to efficiently store, manage, and retrieve data. 
 
 ### a) Database Design Concepts
@@ -79,7 +79,7 @@ Simple (Atomic): Cannot be divided (Ex: Age).
 - Specialization: Breaking an entity into sub-entities.
 - Aggregation: A relationship treated as an entity for higher abstraction.
 
-## 3. Basic SQL Commands
+# 3. Basic SQL Commands
 
 **a) Data Definition Language (DDL)**
 DDL commands are used to define and manage the structure of database objects like tables and schemas.
@@ -120,7 +120,7 @@ TCL commands manage transactions to ensure data integrity.
 - ROLLBACK: Undoes changes made in the current transaction.
 
 
-## 4. Advanced SQL Queries
+# 4. Advanced SQL Queries
 
 
 **a) Join** : Joins combine rows from two or more tables based on a common column.
@@ -265,4 +265,206 @@ Now this is the table ***after Pivoting*** which is giving us better understandi
         FROM monthly_sales;
 
   
-  
+
+#5. Database Design and Optimization
+
+### a) Indexing
+- **Clustered Index**
+
+ - Physically orders the rows in the table based on the index key.
+- There can be only one clustered index per table.
+- The actual table data is stored in the same order as the clustered index.
+- Faster for range queries and sorting on the indexed column.
+- Ex. CREATE CLUSTERED INDEX idx_id ON users(id);
+
+- **Non-Clustered Index**
+
+- it creates a separate structure from the actual table data.
+- Stores pointers (row references) to the data rows.
+- we can have multiple non clustered indexes on a table.
+- CREATE NONCLUSTERED INDEX idx_email ON users(email);
+
+- **Covering Index**
+- A non-clustered index that includes all columns a query needs, so the database doesn’t have to look up the main table.
+- This makes reads faster because everything is already in the index.
+- CREATE NONCLUSTERED INDEX idx_cover ON orders(order_id, customer_id, order_date);
+
+### b) Key Query Optimization Techniques:
+**i) Using Proper Indexes :** 
+- we should make index on the cloumn frequently used in WHERE, GROUP BY and ORDER BY etc.
+- The right index can reduce full table scans and make SELECT, JOIN, and WHERE much faster.
+
+
+**ii) Avoid over SELECT** :  We should only select the needed columns
+
+**iii) Filter Early :** Filtering data before join make query faster and efficient
+
+**iv) Using JOIN Efficiently :**
+
+- Should prefer INNER JOIN over OUTER JOIN if you don’t need unmatched - rows.
+- Make sure JOINs using indexed keys.
+
+**v) Limit the Result Set:** we should use LIMIT in order to avoiding over fetching of data than needed.
+
+**vi) Using EXISTS Instead of IN**
+
+**vii) Analyze and Use Execution Plans**
+
+### c) Explain Plan
+An Explain Plan shows how the database will execute a SQL query step by step.
+
+- Which indexes are used?
+- Which tables are scanned?
+- How many rows are expected to be read?
+- In what order will joins happen?
+- Ex: EXPLAIN SELECT * FROM users WHERE email = 'abc@example.com';
+
+
+### d) Partitioning and Sharding
+
+| Feature            | Partitioning                                   | Sharding                                       |
+|--------------------|------------------------------------------------|------------------------------------------------|
+| Scope              | Within a single database                       | Across multiple databases or servers           |
+| Purpose            | Improve query performance and manageability    | Enable scalability and handle huge data loads  |
+| Data Location      | Same machine / DB instance                     | Different machines / DB instances              |
+| Managed By         | Usually handled by the database engine         | You or your infrastructure team                |
+| Use Case           | Moderate to large datasets                     | Very large, distributed systems                |
+
+
+**What is Partitioning**? :Partitioning splits a large table into smaller parts called partitions, all within the same database.
+
+#### Types of Partitioning:
+- Range – Ex: based on a date column
+
+        CREATE TABLE user_logs (
+            id SERIAL PRIMARY KEY,
+            user_id INT,
+            action TEXT,
+            log_date DATE
+        ) PARTITION BY RANGE (log_date);
+
+        CREATE TABLE user_logs_2023 PARTITION OF user_logs
+        FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
+
+- List – Ex: based on country code
+
+            CREATE TABLE customers (
+                customer_id SERIAL PRIMARY KEY,
+                name TEXT,
+                country_code TEXT
+            ) PARTITION BY LIST (country_code);
+
+            CREATE TABLE customers_us PARTITION OF customers
+            FOR VALUES IN ('US');
+
+
+- Hash – Ex: based on a hash of user_id
+
+
+*Benefits:*
+- Faster queries by scanning only relevant partitions
+- Easier data management (Ex: dropping old partitions)
+- All partitions still act like one logical table
+
+**What is Sharding?** : Sharding splits data across multiple databases or servers. Each shard stores a portion of the data.
+
+*Benefits:*
+- Scales horizontally by adding more machines
+- Spreads load and improves performance
+- Ideal for extremely large datasets
+
+
+
+
+**Partitioning and Sharding Strategies**
+
+| Strategy               | Use When                                            |
+|------------------------|-----------------------------------------------------|
+| Range Partitioning     | Data splits naturally by time, price, or age        |
+| List Partitioning      | Data splits by known values like country or type    |
+| Hash Partitioning      | We want even distribution with no natural range    |
+| Horizontal Sharding    | We split rows (Ex: by user ID) across databases  |
+| Vertical Sharding      | We split columns into different databases          |
+
+
+### e) Concurrency Control and Isolation Levels
+
+**What is Concurrency Control?**  
+Concurrency control ensures that multiple transactions can access the database simultaneously without conflicting or corrupting data.
+It maintains:
+- Correctness
+- Performance
+- Consistency
+
+**What are Isolation Levels?**  
+Isolation levels define how visible one transaction’s work is to others.
+
+| Isolation Level    | Dirty Read | Non-Repeatable Read | Phantom Read |
+|--------------------|------------|----------------------|--------------|
+| Read Uncommitted   | ✅ Yes     | ✅ Yes               | ✅ Yes       |
+| Read Committed     | ❌ No      | ✅ Yes               | ✅ Yes       |
+| Repeatable Read    | ❌ No      | ❌ No                | ✅ Yes       |
+| Serializable       | ❌ No      | ❌ No                | ❌ No        |
+
+---
+
+#### 1. **Read Uncommitted**
+- Can read uncommitted (dirty) data from other transactions.
+- Unsafe, rarely used.
+
+#### 2. **Read Committed**
+- Only sees committed data.
+- Prevents dirty reads, but **non-repeatable reads** and **phantoms** are possible.
+- Default in PostgreSQL and Oracle.
+
+#### 3. **Repeatable Read**
+- Data read once won’t change during the transaction.
+- Prevents dirty and non-repeatable reads.
+- **Phantom reads** can still occur.
+- Default in MySQL (InnoDB).
+
+#### 4. **Serializable**
+- Strictest level.
+- Transactions behave as if they ran one after another.
+- Prevents all anomalies (dirty, non-repeatable, phantom).
+- Slowest due to locking or blocking.
+
+**Terminology Explained**
+
+| Phenomenon         | Description                                                 |
+|--------------------|-------------------------------------------------------------|
+| Dirty Read         | Read data not yet committed by another transaction          |
+| Non-repeatable Read| A row returns different values when read twice              |
+| Phantom Read       | A query returns new rows when re-executed during transaction|
+
+
+
+### f) Deadlocks and How to Handle Them
+
+**What is a Deadlock?**  
+A deadlock occurs when two or more transactions block each other by holding a lock the other needs. As a result, none of the transactions can proceed — they are stuck waiting for each other.
+
+**Example Scenario:**
+- Transaction A locks `Table 1` and wants `Table 2`
+- Transaction B locks `Table 2` and wants `Table 1`
+- Both wait forever → **Deadlock**
+
+
+
+**How to Detect Deadlocks?**
+- Most modern databases (PostgreSQL, MySQL, SQL Server) automatically detect deadlocks.
+- When detected, one transaction is usually **aborted** so the other can continue.
+
+
+
+**How to Handle or Prevent Deadlocks?**
+
+- Always Access Tables in the Same Order
+
+-  Keep Transactions Short and Fast
+
+-  Use Lower Isolation Levels (when safe)
+
+-  Add Explicit Lock Timeouts
+
+
