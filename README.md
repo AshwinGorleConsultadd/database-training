@@ -264,4 +264,12 @@ Now this is the table ***after Pivoting*** which is giving us better understandi
         Feb AS sales 
         FROM monthly_sales;
 
+
+### Step-by-Step Query Explaination
+
+- **Step 1** : Creating *"ranked_desc"* table which orders the images in desending order of their quality score hence we will use it for taking positive samples.
+- **Step 2** : Creating *"ranked_asce"* table which orders the images in ascending order of their quality score hence we will use it for taking negative samples.
+- **Step 3** : creating *"positive_samples"* table from *"ranked_desc"*  which is taking each thired record starting from 1
+- **Step 4** :creating *"negative_samples"* table from *"ranked_asce"*  which is taking each thired record starting from 1
+- **Step 5** :simple combining the results of both *"positive_samples"* and *"nagative_samples"* table
   
