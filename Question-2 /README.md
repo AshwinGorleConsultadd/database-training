@@ -1,6 +1,7 @@
 # Task - 2 
-**1) Design ER-Diagram for Music Streaming Platform.** 
-**2) Write query based on it.** 
+- **1) Design ER-Diagram for Music Streaming Platform.** 
+- **2) Write query based on it.**
+- **3) Design Class Diagram for Music Streaming Platform.** 
 
 ## Music Streaming Plateform DB design
 follwing queries are bassed on the database design of Music Streaming Plateform provided in the ER-Diagram (image).
