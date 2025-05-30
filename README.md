@@ -469,3 +469,145 @@ A deadlock occurs when two or more transactions block each other by holding a lo
 -  Add Explicit Lock Timeouts
 
 
+## 6. Stored Procedures and Functions
+
+**a) Stored Procedures**  
+- A **stored procedure** is a saved block of SQL code that can be reused.  
+- It can take **input parameters**, perform actions (like insert/update/delete), and return results.  
+- Useful for **code reusability**, **modularity**, and **performance optimization**.  
+- Example:
+DELIMITER //
+CREATE PROCEDURE GetStudents()
+BEGIN
+SELECT * FROM students;
+END //
+DELIMITER ;
+
+
+**b) User-Defined Functions (UDFs)**  
+- A **function** returns a **single value** and is used inside SQL queries.  
+- Unlike procedures, functions **must return a value** and **can’t modify database state**.  
+- Example:
+CREATE FUNCTION Square(x INT) RETURNS INT
+RETURN x * x;
+
+
+**c) Triggers and Their Uses**  
+- A **trigger** is a piece of code that runs **automatically** when a specific event (INSERT, UPDATE, DELETE) occurs on a table.  
+- Used for **auditing**, **enforcing business rules**, or **logging changes**.  
+- Example:
+CREATE TRIGGER after_insert_students
+AFTER INSERT ON students
+FOR EACH ROW
+INSERT INTO logs (message) VALUES ('A student was added');
+
+
+**d) Error Handling and Transaction Management**  
+- Inside procedures, use **error handlers** to catch exceptions and avoid failures.  
+- Use **transactions** to ensure **data consistency**: a group of operations succeeds or fails together.  
+- Example:
+START TRANSACTION;
+-- perform multiple operations
+COMMIT; -- if all succeed
+ROLLBACK; -- if any fails
+
+
+
+# 7. Database Security
+
+**a) Authentication and Authorization**  
+- **Authentication**: Verifies the identity of the user (e.g., via username and password).  
+- **Authorization**: Determines what an authenticated user is allowed to do (e.g., read, write, delete).
+
+**b) Role-Based Access Control (RBAC)**  
+- Access is assigned based on **roles** rather than individual users.  
+- Simplifies permission management by assigning users to roles like `admin`, `developer`, or `readonly`.  
+- Example: A `developer` role may have access to write code, but not to deploy it.
+
+**c) Encryption**  
+- **Data-at-Rest**: Encrypts stored data on disk (e.g., using AES).  
+- **Data-in-Transit**: Encrypts data while being transmitted over the network (e.g., using TLS/SSL).  
+- Protects sensitive data from unauthorized access and interception.
+
+**d) SQL Injection and Prevention**  
+- SQL injection is a type of attack where malicious input is used to manipulate SQL queries.  
+  Example: `' OR '1'='1` can bypass login validation.  
+- **Prevention**:
+  - Use **prepared statements** or **parameterized queries**.
+  - Validate and sanitize **user input**.
+  - Use **ORMs** that abstract away raw SQL.
+
+**e) Auditing and Compliance**  
+- **Auditing**: Tracks and logs user activity in the database (e.g., logins, updates, deletes).  
+- Helps detect suspicious activity and maintain a trail for security reviews.  
+- **Compliance**: Ensures database practices meet standards like GDPR, HIPAA, or PCI-DSS.
+
+
+
+# 8. Advanced Topics in SQL
+
+**a) Full-Text Search**  
+- Enables efficient searching of textual data within a database.  
+- Allows for complex queries like searching for words, phrases, or using natural language.  
+- Example (MySQL):  
+SELECT * FROM articles
+WHERE MATCH(title, body)
+AGAINST('database optimization');
+
+
+**b) Temporal Tables**  
+- Track and query data changes over time using **system-versioned tables**.  
+- Useful for **auditing**, **historical analysis**, and **data recovery**.  
+- Supported in SQL Server with `SYSTEM_TIME` clause.  
+- Example:
+SELECT * FROM Employee FOR SYSTEM_TIME AS OF '2023-01-01';
+
+
+**c) JSON and XML Data Handling**  
+- SQL databases support storing and querying **semi-structured** data like JSON and XML.  
+- Allows applications to work with dynamic, nested data formats.  
+- Example (MySQL JSON):
+SELECT JSON_EXTRACT(info, '$.address.city') FROM users;
+
+
+**d) Dynamic SQL and Metaprogramming**  
+- SQL generated and executed at runtime — useful for flexible query generation.  
+- Implemented using `EXECUTE`, `PREPARE`, or stored procedures.  
+- Example (MySQL):
+SET @query = 'SELECT * FROM ' + tableName;
+PREPARE stmt FROM @query;
+EXECUTE stmt;
+
+
+**e) Spatial Data and GIS Functions**  
+- Used to store and analyze **geographic** or **location-based** data.  
+- Spatial data types include `POINT`, `LINESTRING`, `POLYGON`.  
+- GIS functions help with distance calculations, area, and intersections.  
+- Example:
+SELECT ST_Distance(
+POINT(10, 20),
+POINT(30, 40)
+);
+
+
+# 9. Big Data and NoSQL Databases
+
+**a) Introduction to Big Data Concepts**  
+- Big Data refers to extremely large datasets that traditional databases cannot handle efficiently.  
+- Characterized by the **3 Vs**: Volume (size), Velocity (speed), and Variety (types of data).  
+- Requires distributed storage and processing (e.g., Hadoop, Spark).
+
+**b) Differences Between SQL and NoSQL**  
+- **SQL Databases**: Relational, schema-based, use structured query language.  
+- **NoSQL Databases**: Non-relational, schema-less, designed for scalability and flexibility.  
+- SQL is best for complex queries and data integrity; NoSQL excels in unstructured data and fast scalability.
+
+**c) Popular NoSQL Databases**  
+- **MongoDB**: Document-oriented, stores JSON-like documents.  
+- **Cassandra**: Wide-column store, excels in high availability and scalability.  
+- **Redis**: In-memory key-value store, great for caching and real-time applications.
+
+**d) Integrating SQL Databases with Big Data Technologies**  
+- SQL databases can work alongside Big Data tools for analytics and ETL processes.  
+- Tools like **Apache Sqoop** help transfer data between SQL databases and **Hadoop**.  
+- **Apache Spark** supports SQL queries on big datasets with high-speed in-memory computation.
