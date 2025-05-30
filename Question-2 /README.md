@@ -2,23 +2,26 @@
 ## Music Streaming Plateform DB design
 follwing queries are bassed on the database design provided in the ER-Diagram.
 
-### 1. Get All Active Users with Valid Subscriptions
+### 1. Geting All Active Users with Valid Subscriptions
 
-    SELECT u.user_id, u.name, us.plan_id, us.end_date
-    FROM User u
-    JOIN User_Subscription us ON u.user_id = us.user_id
-    WHERE CURRENT_DATE BETWEEN us.start_date AND us.end_date;
+    WITH CTE as (SELECT user_id FROM User_Subscription us
+    WHERE CURRENT_DATE BETWEEN us.start_date AND us.end_date
+    GROUP BY us.user_id)
+    
+    SELECT user.user_id, user.name from CTE 
+    JOIN User ON CTE.user_id = User.user_id
 
-### 2. List Top 10 Most Played Tracks
+### 2. Listing Top 10 Most Played Track in jan
 
     SELECT lh.track_id, t.title, COUNT(*) AS play_count
     FROM Listening_History lh
     JOIN Track t ON lh.track_id = t.track_id
-    GROUP BY lh.track_id, t.title
+    GROUP BY lh.track_id
     ORDER BY play_count DESC
     LIMIT 10;
 
-### 3. Find Tracks in a Given Playlist
+
+### 3. Geting Tracks in a Given Playlist
 
     SELECT t.track_id, t.title
     FROM Playlist p
@@ -32,16 +35,15 @@ follwing queries are bassed on the database design provided in the ER-Diagram.
     FROM User_Subscription
     WHERE end_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '10' DAY;
 
-### 5. List All Albums by a Specific Artist
+### 5. Listing All Albums by a Specific Artist
 
-(Assumes you have or will add Album_Artist)
 
     SELECT a.album_id, a.title
     FROM Album a
     JOIN Album_Artist aa ON a.album_id = aa.album_id
     WHERE aa.artist_id = 'YOUR_ARTIST_ID';
 
-### 6. Top 5 Users by Listening Time
+### 6. finding Top 5 Users by Listening Time
 
     SELECT lh.user_id, SUM(lh.play_duration) AS total_time
     FROM Listening_History lh
@@ -49,7 +51,7 @@ follwing queries are bassed on the database design provided in the ER-Diagram.
     ORDER BY total_time DESC
     LIMIT 5;
 
-### 7. Most Popular Genre Based on Plays
+### 7. geting Most Popular Genre Based on Plays
 
     SELECT t.genre, COUNT(*) AS play_count
     FROM Listening_History lh
@@ -58,7 +60,7 @@ follwing queries are bassed on the database design provided in the ER-Diagram.
     ORDER BY play_count DESC
     LIMIT 1;
 
-### 8. Which Plans Have the Most Subscribers
+### 8. inspecting Which Plans Have the Most Subscribers
 
     SELECT sp.name, COUNT(us.user_id) AS total_subscribers
     FROM Subscription_Plan sp
@@ -72,9 +74,3 @@ follwing queries are bassed on the database design provided in the ER-Diagram.
     FROM Track
     WHERE release_date >= CURRENT_DATE - INTERVAL '30' DAY;
 
-### 10. List of Follow Relationships (Who Follows Whom)
-
-    SELECT f.follow_id AS follower, u.name AS follower_name, f.user_id AS followed, u2.name AS followed_name, f.date
-    FROM follow f
-    JOIN User u ON f.follow_id = u.user_id
-    JOIN User u2 ON f.user_id = u2.user_id;
